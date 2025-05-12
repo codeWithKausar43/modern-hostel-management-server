@@ -29,10 +29,8 @@ async function run() {
     );
 
     // meals releted apis
-    const mealsCollection = client
-      .db("modern-hostel-management")
-      .collection("meals");
-
+    const mealsCollection = client.db("modern-hostel-management").collection("meals");
+    const reviewsCollection  = client.db("modern-hostel-management").collection("reviews")
     app.get("/meals", async (req, res) => {
       const cursor = mealsCollection.find();
       const result = await cursor.toArray();
@@ -49,6 +47,13 @@ async function run() {
     app.post("/meals", async(req, res) => {
       const meal = req.body
       const result = await mealsCollection.insertOne(meal)
+      res.send(result)
+    })
+
+    // reviews collection 
+    app.post("/review", async(req, res) => {
+      const review = req.body
+      const result = await reviewsCollection.insertOne(review)
       res.send(result)
     })
 
