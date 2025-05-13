@@ -28,13 +28,39 @@ async function run() {
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
 
-    // meals releted apis
-    const mealsCollection = client.db("modern-hostel-management").collection("meals");
-    const reviewsCollection  = client.db("modern-hostel-management").collection("reviews")
-    app.get("/meals", async (req, res) => {
-      const cursor = mealsCollection.find();
-      const result = await cursor.toArray();
+    const usersCollection = client
+      .db("modern-hostel-management")
+      .collection("users");
+    const mealsCollection = client
+      .db("modern-hostel-management")
+      .collection("meals");
+    const reviewsCollection = client
+      .db("modern-hostel-management")
+      .collection("reviews");
+
+    // users apis
+    app.post("/users", async (req, res) => {
+      const users = req.body;
+      const result = await usersCollection.insertOne(users);
       res.send(result);
+    });
+
+    app.get("/users", async(req, res) => {
+      const users = await usersCollection.find().toArray()
+      res.send(users)
+    })
+    
+     
+app.delete("/users/:id", async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) };
+  const result = await usersCollection.deleteOne(query);
+  res.send(result);
+});
+    // meals releted apis
+    app.get("/meals", async (req, res) => {
+      const meals = await mealsCollection.find().toArray();
+      res.send(meals);
     });
 
     app.get("/meals/:id", async (req, res) => {
@@ -44,19 +70,18 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/meals", async(req, res) => {
-      const meal = req.body
-      const result = await mealsCollection.insertOne(meal)
-      res.send(result)
-    })
+    app.post("/meals", async (req, res) => {
+      const meal = req.body;
+      const result = await mealsCollection.insertOne(meal);
+      res.send(result);
+    });
 
-    // reviews collection 
-    app.post("/review", async(req, res) => {
-      const review = req.body
-      const result = await reviewsCollection.insertOne(review)
-      res.send(result)
-    })
-
+    // reviews collection
+    app.post("/review", async (req, res) => {
+      const review = req.body;
+      const result = await reviewsCollection.insertOne(review);
+      res.send(result);
+    });
   } finally {
     // Ensures that the client will close when you finish/error
     // await client.close();
