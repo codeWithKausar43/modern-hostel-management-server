@@ -40,23 +40,40 @@ async function run() {
 
     // users apis
     app.post("/users", async (req, res) => {
-      const users = req.body;
-      const result = await usersCollection.insertOne(users);
+      const user = req.body;
+      const query = { email: user.email };
+      const existinguser = await usersCollection.findOne(query);
+      if (existinguser) {
+        return { message: "users allready existing" };
+      }
+      const result = await usersCollection.insertOne(user);
       res.send(result);
     });
 
-    app.get("/users", async(req, res) => {
-      const users = await usersCollection.find().toArray()
-      res.send(users)
+    app.get("/users", async (req, res) => {
+      const users = await usersCollection.find().toArray();
+      res.send(users);
+    });
+
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    app.patch("/users/admin/:id", async(req, res) => {
+      const id  = req.params.id
+      const filter = { _id : new ObjectId(id)}
+      const upDateDoc = {
+        $set : {
+          role : "Admin"
+        }
+      }
+      const result = await usersCollection.updateOne(filter, upDateDoc)
+      res.send(result)
     })
-    
-     
-app.delete("/users/:id", async (req, res) => {
-  const id = req.params.id;
-  const query = { _id: new ObjectId(id) };
-  const result = await usersCollection.deleteOne(query);
-  res.send(result);
-});
+
     // meals releted apis
     app.get("/meals", async (req, res) => {
       const meals = await mealsCollection.find().toArray();
@@ -80,6 +97,11 @@ app.delete("/users/:id", async (req, res) => {
     app.post("/review", async (req, res) => {
       const review = req.body;
       const result = await reviewsCollection.insertOne(review);
+      res.send(result);
+    });
+
+    app.get("/reviews", async (req, res) => {
+      const result = await reviewsCollection.find().toArray();
       res.send(result);
     });
   } finally {
